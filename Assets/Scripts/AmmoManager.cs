@@ -1,12 +1,10 @@
+using TMPro;
 using UnityEngine;
 
-public class SoundManager : MonoBehaviour
+public class AmmoManager : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    public static SoundManager Instance { get; set; }
-    public AudioSource shootingAk47;
-    public AudioSource reloadAk47;
-    public AudioSource emptyMagazine;
+    public static AmmoManager Instance { get; set; }
+    public TextMeshProUGUI ammoDisplay;
 
     private void Awake()
     {

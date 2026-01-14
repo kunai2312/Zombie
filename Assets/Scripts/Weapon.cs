@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -16,6 +17,7 @@ public class Weapon : MonoBehaviour
     //burt
     public int bulletsPerBurt = 3;
     public int burstBulletLeft;
+    public bool isReloading;
 
     //Spread
     public float spreadIntensity;
@@ -28,6 +30,13 @@ public class Weapon : MonoBehaviour
 
     public GameObject muzzleEffect;
     public Animator animator;
+
+    //loading
+    public float reloadTime;
+    public int magazineSize, bulletsLeft;
+
+
+
 
 
 
@@ -50,11 +59,16 @@ public class Weapon : MonoBehaviour
         readyToShoot = true;
         burstBulletLeft = bulletsPerBurt;
         animator = GetComponent<Animator>();
+        bulletsLeft = magazineSize;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (bulletsLeft == 0 && isShooting)
+        {
+            SoundManager.Instance.emptyMagazine.Play();
+        }
         //nếu curentShootingMode là Auto
         if (curentShootingMode == ShootingMode.Auto)
         {
@@ -68,16 +82,30 @@ public class Weapon : MonoBehaviour
             //bấm chuột mới bắn
             isShooting = Input.GetKeyDown(KeyCode.Mouse0);
         }
+        if (Input.GetKeyDown(KeyCode.R) && bulletsLeft < magazineSize && isReloading == false)
+        {
+            Reload();
+        }
+        if (readyToShoot && isShooting == false && isReloading == false && bulletsLeft <= 0)
+        {
+            // Reload();
+        }
 
-        if (readyToShoot && isShooting)
+        if (readyToShoot && isShooting && bulletsLeft > 0)
         {
             burstBulletLeft = bulletsPerBurt;
             FireWeapon();
+        }
+
+        if (AmmoManager.Instance.ammoDisplay != null)
+        {
+            AmmoManager.Instance.ammoDisplay.text = $"{bulletsLeft / bulletsPerBurt}/{magazineSize / bulletsPerBurt}";
         }
     }
 
     private void FireWeapon()
     {
+        bulletsLeft--;
         muzzleEffect.GetComponent<ParticleSystem>().Play();
 
         animator.SetTrigger("RECOIL");
@@ -117,6 +145,19 @@ public class Weapon : MonoBehaviour
             burstBulletLeft--;
             Invoke("FireWeapon", shootingDelay);
         }
+
+    }
+    private void Reload()
+    {
+        SoundManager.Instance.reloadAk47.Play();
+        isReloading = true;
+        Invoke("ReloadCompleted", reloadTime);
+
+    }
+    private void ReloadCompleted()
+    {
+        bulletsLeft = magazineSize;
+        isReloading = false;
     }
     private void ResetShot()
     {
