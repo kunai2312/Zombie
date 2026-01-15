@@ -82,13 +82,18 @@ public class Weapon : MonoBehaviour
             //bấm chuột mới bắn
             isShooting = Input.GetKeyDown(KeyCode.Mouse0);
         }
+
+        //nếu bấm R và bbl < ms và isrl=false
+        //             (29/30)    (lúc đầu khai báo đã là false)
         if (Input.GetKeyDown(KeyCode.R) && bulletsLeft < magazineSize && isReloading == false)
         {
             Reload();
         }
+
+
         if (readyToShoot && isShooting == false && isReloading == false && bulletsLeft <= 0)
         {
-            // Reload();
+            Reload();
         }
 
         if (readyToShoot && isShooting && bulletsLeft > 0)
@@ -133,13 +138,16 @@ public class Weapon : MonoBehaviour
 
         if (allowReset)
         {
-            //đặt lịch Resetshot sau 2 giây
+            //đặt lịch Resetshot sau "shootingDelay" giây
             Invoke("ResetShot", shootingDelay);
 
             //sau khi bắn thành false,đợi 2 giây chạy ResetShot
             allowReset = false;
         }
         //Burt Mode
+        //nếu đang chỉnh chế độ là burt và có bbl lớn hơn 1 viên
+        //vd:bbl=3 phát súng đầu tiên thì giá trị là 3 vì hàm FW chạy trong 1 frame
+        //nên bắn và chạy dòng này cùng lúc
         if (curentShootingMode == ShootingMode.Burt && burstBulletLeft > 1)
         {
             burstBulletLeft--;
@@ -149,14 +157,22 @@ public class Weapon : MonoBehaviour
     }
     private void Reload()
     {
+        //gọi Singleton SoundManager để phát âm thanh
         SoundManager.Instance.reloadAk47.Play();
+
+        //true để người chơi kh gài đạn đc nữa
         isReloading = true;
+
+        //đợi thời gian reloadtime(2s) xong chạy hàm ReloadCompleted
         Invoke("ReloadCompleted", reloadTime);
 
     }
     private void ReloadCompleted()
     {
+        //gạt đạn xong số đạn sẽ về đúng số lượng đạn như băng đạn(30/30)
         bulletsLeft = magazineSize;
+
+        //false để ng chơi có thể gài đạn
         isReloading = false;
     }
     private void ResetShot()
