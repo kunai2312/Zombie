@@ -1,11 +1,16 @@
+using Palmmedia.ReportGenerator.Core.Parser.Analysis;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class SoundManager : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public static SoundManager Instance { get; set; }
-    public AudioSource shootingAk47;
+    public AudioSource shootingChannel;
+    public AudioClip shootingPistol;
+    public AudioClip shootingAk47;
     public AudioSource reloadAk47;
+    public AudioSource reloadPistol;
     public AudioSource emptyMagazine;
 
     private void Awake()
@@ -20,6 +25,32 @@ public class SoundManager : MonoBehaviour
         else
         {
             Instance = this;
+        }
+    }
+    public void ShootingSound(Weapon.WeaponModel weapon)
+    {
+        switch (weapon)
+        {
+            case Weapon.WeaponModel.Pistol:
+                shootingChannel.PlayOneShot(shootingPistol);
+                break;
+            case Weapon.WeaponModel.Ak47:
+                shootingChannel.PlayOneShot(shootingAk47);
+                break;
+        }
+
+
+    }
+    public void ReloadSound(Weapon.WeaponModel weapon)
+    {
+        switch (weapon)
+        {
+            case Weapon.WeaponModel.Pistol:
+                reloadPistol.Play();
+                break;
+            case Weapon.WeaponModel.Ak47:
+                reloadAk47.Play();
+                break;
         }
     }
 }

@@ -35,7 +35,12 @@ public class Weapon : MonoBehaviour
     public float reloadTime;
     public int magazineSize, bulletsLeft;
 
-
+    public enum WeaponModel
+    {
+        Pistol,
+        Ak47
+    }
+    public WeaponModel thisWeaponModel;
 
 
 
@@ -73,6 +78,7 @@ public class Weapon : MonoBehaviour
         if (curentShootingMode == ShootingMode.Auto)
         {
             //Giữ chuột bắn liên tục
+            //giữ chuột thì isst=true thả ra = false
             isShooting = Input.GetKey(KeyCode.Mouse0);
         }
 
@@ -80,30 +86,39 @@ public class Weapon : MonoBehaviour
         else if (curentShootingMode == ShootingMode.Single || curentShootingMode == ShootingMode.Burt)
         {
             //bấm chuột mới bắn
+            //isSt=true sau khi bấm xong thì thành false
             isShooting = Input.GetKeyDown(KeyCode.Mouse0);
         }
 
         //nếu bấm R và bbl < ms và isrl=false
-        //             (29/30)    (lúc đầu khai báo đã là false)
+        //bbl<ms tránh việc khi còn 30/30 mà vẫn gài đạn đc
+        //isReloading tránh việc gài đạn liên tục
         if (Input.GetKeyDown(KeyCode.R) && bulletsLeft < magazineSize && isReloading == false)
         {
             Reload();
         }
 
-
+        //readytoshoot=true và is shooting=false và isReloading == false và bulletsLeft <= 0
+        //sau khi hết đạn sẽ chờ "shootdelay" giây thì readytoshoot=true
+        //nếu hết đạn mà vẫn giữ chuột thì isShooting == true hàm if sẽ kh chạy đc
+        //isReloading tránh việc gài đạn liên tục
         if (readyToShoot && isShooting == false && isReloading == false && bulletsLeft <= 0)
         {
             Reload();
         }
 
-        if (readyToShoot && isShooting && bulletsLeft > 0)
+
+        if (readyToShoot && isShooting && isReloading == false && bulletsLeft > 0)
         {
             burstBulletLeft = bulletsPerBurt;
             FireWeapon();
         }
 
+        //nếu đã gán giá trị cho ammoDisplay thì mới thực hiện bên trong
+        //==null : giá trị rổng , !=null : giá trị kh rổng
         if (AmmoManager.Instance.ammoDisplay != null)
         {
+            //gán nội dung chữ cho ammoDisplay
             AmmoManager.Instance.ammoDisplay.text = $"{bulletsLeft / bulletsPerBurt}/{magazineSize / bulletsPerBurt}";
         }
     }
@@ -115,7 +130,8 @@ public class Weapon : MonoBehaviour
 
         animator.SetTrigger("RECOIL");
 
-        SoundManager.Instance.shootingAk47.Play();
+        //SoundManager.Instance.shootingAk47.Play();
+        SoundManager.Instance.ShootingSound(thisWeaponModel);
 
         readyToShoot = false;
         Vector3 shootingDirection = CalculateDirectionAndSpread().normalized;
@@ -157,10 +173,13 @@ public class Weapon : MonoBehaviour
     }
     private void Reload()
     {
+
         //gọi Singleton SoundManager để phát âm thanh
-        SoundManager.Instance.reloadAk47.Play();
+        SoundManager.Instance.ReloadSound(thisWeaponModel);
+        //SoundManager.Instance.reloadAk47.Play();
 
         //true để người chơi kh gài đạn đc nữa
+        //vì có invoke nên nếu kh có dòng này thì sẽ chạy hàm Reload liên tục
         isReloading = true;
 
         //đợi thời gian reloadtime(2s) xong chạy hàm ReloadCompleted
@@ -174,6 +193,7 @@ public class Weapon : MonoBehaviour
 
         //false để ng chơi có thể gài đạn
         isReloading = false;
+
     }
     private void ResetShot()
     {
